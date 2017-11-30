@@ -1,5 +1,6 @@
 import random
 import smtplib
+import sys
 
 class Person:
     give_ID = 0
@@ -20,6 +21,7 @@ def addPerson(name, email, persons):
     ID_count += 1
 
 def make_santa(persons):
+    print "Santifying!\n"
     length = len(persons)
     allowed_values = list(range(0, length))
     print "current values: ", allowed_values
@@ -33,11 +35,9 @@ def make_santa(persons):
                 make_santa(persons)
                 break
 
-        print persons[i].name, ": ", i, "|| num: ", num
         persons[i].give_ID = persons[num].id
-        persons[num].taken = True
+        persons[num].take = True
         allowed_values.remove(num)
-        print "updated values: ", allowed_values
 
 def main():
     persons = []
@@ -62,16 +62,44 @@ def main():
 
         if choice == 'c':
             nameInp = raw_input("Name: ")
-            emailInp = raw_input("Email: ")
-            addPerson(nameInp, emailInp, persons)
+            emailInp = raw_input("Username: ")
+            addPerson(nameInp, (emailInp + "@jacobs-university.de"), persons)
+
+        if choice == 'e':
+            print "People list:"
+            for person in persons:
+                print person.id, ": ", person.name
+            search = raw_input("ID: ")
+            p_edit = persons[int(search)]
+            n_edit = raw_input("New name: ")
+            e_edit = raw_input("New username: ")
+            persons[int(search)].name = n_edit
+            persons[int(search)].email = e_edit + "@jacobs-university.de"
+
+        if choice == 'r':
+            print "Rigging Terminal"
+            print "Select two people"
+            for person in persons:
+                print person.id, ": ", person.name
+            n = int(raw_input("to give: "))
+            m = int(raw_input("to whom: "))
+
+            has = 0
+            for x in persons:
+                if x.give_ID == persons[n].id:
+                    has = x.id
+
+            temp = persons[has].give_ID
+            persons[has].give_ID = persons[m].give_ID
+            persons[m].give_ID = temp
 
         if choice == 'send':
             if len(persons) < 2:
                 print "Not enough people"
             for i in persons:
-                if not i.taken:
-                    print("Person", i.name, "not taken")
-                    break
+                if not i.take:
+                    print("Person ", i.name, " not taken")
+                    sys.exit()
             print "Sending Emails..."
             server = smtplib.SMTP('smtp.gmail.com', 587)
             server.ehlo()
@@ -84,7 +112,7 @@ def main():
                   "To: " + str(person.email),
                   "Subject: Ho Ho Ho!",
                   "",
-                  "Dear Santa " + str(person.name) + ",\n\nYou're the secret santa to " + str(persons[person.give_ID].name) + "!\nSpending limit is 20 euros\n\nHappy shopping!"
+                  "There once was a fam,\ntiempo es muy frio\nwhere da presents at?\n\nDear Santa " + str(person.name) + ",\n\nYou're the secret santa to " + str(persons[person.give_ID].name) + "!\nSpending limit is 20 euros\nBe ready by 16th of December!\n\nHappy shopping!"
                   ])
                 server.sendmail("secretsanta.jacobs@gmail.com", person.email, message)
             print "Sending success"
